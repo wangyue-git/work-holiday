@@ -70,4 +70,11 @@ public class CategoryServiceImpl extends BaseApiService implements CategoryServi
 
         return this.setResultError("id不合法");
     }
+
+    @Transactional
+    @Override
+    public Result<JsonObject> editCategory(CategoryEntity categoryEntity) {
+        categoryMapper.updateByPrimaryKeySelective(categoryEntity);
+        return this.setResultSuccess();
+    }
 }
