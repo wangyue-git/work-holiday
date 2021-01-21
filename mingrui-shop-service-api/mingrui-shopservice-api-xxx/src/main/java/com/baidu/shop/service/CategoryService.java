@@ -7,10 +7,7 @@ import com.google.gson.JsonObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -38,4 +35,7 @@ public interface CategoryService {
     @PutMapping(value = "category/edit")
     Result<JsonObject> editCategory(@Validated({MingruiOperation.Update.class})@RequestBody CategoryEntity categoryEntity);
 
+    @ApiOperation(value = "新增商品分类")
+    @PostMapping(value = "category/add")
+    Result<JsonObject>addCategory(@Validated({MingruiOperation.Add.class})@RequestBody CategoryEntity categoryEntity);
 }
