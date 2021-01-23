@@ -6,6 +6,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -32,4 +33,8 @@ public class BrandDto extends BaseDTO {
 
     @ApiModelProperty(value = "品牌首字母")
     private Character letter;
+
+    @ApiModelProperty(value="分类集合")
+    @NotEmpty(message = "分类id不能为空",groups = {MingruiOperation.Update.class,MingruiOperation.Add.class})
+    private String categories;
 }
