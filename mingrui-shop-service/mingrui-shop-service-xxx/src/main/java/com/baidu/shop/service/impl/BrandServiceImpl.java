@@ -1,5 +1,6 @@
 package com.baidu.shop.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baidu.shop.base.BaiDuBeanUtil;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
@@ -73,6 +74,35 @@ public class BrandServiceImpl extends BaseApiService implements BrandService {
         return this.setResultSuccess();
     }
 
+    //修改
+    @Transactional
+    @Override
+    public Result<JsonObject> editBrandInfo(BrandDto brandDto) {
+        BrandEntity brandEntity = BaiDuBeanUtil.copyProperties(brandDto,BrandEntity.class);
+        brandEntity.setLetter(PinyinUtil.getUpperCase(String.valueOf(brandEntity.getName().toCharArray()[0]),false).toCharArray()[0]);
+        brandMapper.updateByPrimaryKeySelective(brandEntity);
+
+        //通过brandId删除中间表的数据
+        this.deleteCategoryBrandByBrandId(brandEntity.getId());
+
+        this.insertCategoryBrandList(brandDto.getCategories(),brandEntity.getId());
+
+        return this.setResultSuccess();
+    }
+
+    //删除
+    @Transactional
+    @Override
+    public Result<JSONObject> deleteBrandInfo(Integer id) {
+        //删除品牌
+        brandMapper.deleteByPrimaryKey(id);
+        //删除品牌关联的分类
+        this.deleteCategoryBrandByBrandId(id);
+
+        return this.setResultSuccess();
+    }
+
+
 
     //封装批量新增
     private void insertCategoryBrandList(String categories,Integer brandId){
@@ -98,5 +128,12 @@ public class BrandServiceImpl extends BaseApiService implements BrandService {
 
             categoryBrandMapper.insertSelective(categoryBrandEntity);
         }
+    }
+
+    //封装删除品牌关联分类
+    private void deleteCategoryBrandByBrandId(Integer brandId){
+        Example example = new Example(CategoryBrandEntity.class);
+        example.createCriteria().andEqualTo("brandId",brandId);
+        categoryBrandMapper.deleteByExample(example);
     }
 }

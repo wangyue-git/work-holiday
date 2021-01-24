@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>mingrui-shopservice-api-xxx</artifactId>
+    <artifactId>mingrui-shop-service-api-xxx</artifactId>
 
     <dependencies>
         <!--帮助开发人员快速生成API文档-->

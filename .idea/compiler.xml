@@ -7,9 +7,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="mingrui-shop-basic-eureka-server" />
-        <module name="mingrui-shopservice-api-xxx" />
         <module name="mingrui-shop-basic-upload-server" />
         <module name="mingrui-shop-commons-core" />
+        <module name="mingrui-shop-service-api-xxx" />
         <module name="mingrui-shop-basic-zuul-server" />
         <module name="mingrui-shop-service-xxx" />
       </profile>
@@ -23,8 +23,8 @@
       <module name="mingrui-shop-commons-core" options="-parameters" />
       <module name="mingrui-shop-service" options="-parameters" />
       <module name="mingrui-shop-service-api" options="-parameters" />
+      <module name="mingrui-shop-service-api-xxx" options="-parameters" />
       <module name="mingrui-shop-service-xxx" options="-parameters" />
-      <module name="mingrui-shopservice-api-xxx" options="-parameters" />
     </option>
   </component>
 </project>
