@@ -79,6 +79,7 @@ public class SpecGroupServiceImpl extends BaseApiService implements SpecGroupSer
         return this.setResultSuccess();
     }
 
+    //规格参数查询
     @Override
     public Result<List<SpecParamEntity>> getSpecParamInfo(SpecParamDto specParamDTO) {
         SpecParamEntity specParamEntity = BaiDuBeanUtil.copyProperties(specParamDTO, SpecParamEntity.class);
@@ -95,5 +96,31 @@ public class SpecGroupServiceImpl extends BaseApiService implements SpecGroupSer
         List<SpecParamEntity> specParamEntities = specParamMapper.selectByExample(example);
 
         return this.setResultSuccess(specParamEntities);
+    }
+
+    //规格参数新增
+    @Transactional
+    @Override
+    public Result<JSONObject> saveSpecParam(SpecParamDto specParamDTO) {
+        specParamMapper.insertSelective(BaiDuBeanUtil.copyProperties(specParamDTO,SpecParamEntity.class));
+
+        return this.setResultSuccess();
+    }
+
+    //规格参数修改
+    @Transactional
+    @Override
+    public Result<JSONObject> editSpecParam(SpecParamDto specParamDTO) {
+        specParamMapper.updateByPrimaryKeySelective(BaiDuBeanUtil.copyProperties(specParamDTO,SpecParamEntity.class));
+
+        return this.setResultSuccess();
+    }
+
+    //规格参数删除
+    @Transactional
+    @Override
+    public Result<JSONObject> deleteSpecParam(@NotNull Integer id) {
+        specParamMapper.deleteByPrimaryKey(id);
+        return this.setResultSuccess();
     }
 }

@@ -38,4 +38,18 @@ public interface SpecGroupService {
     @ApiOperation(value = "通过条件查询规格参数")
     @GetMapping(value = "specparam/getSpecParamInfo")
     Result<List<SpecParamEntity>> getSpecParamInfo(SpecParamDto specParamDTO);
+
+    @ApiOperation(value = "新增规格参数")
+    @PostMapping(value = "specparam/save")
+    Result<JSONObject> saveSpecParam(@Validated({MingruiOperation.Add.class}) @RequestBody SpecParamDto specParamDTO);
+
+    @ApiOperation(value = "修改规格参数")
+    @PutMapping(value = "specparam/save")
+    Result<JSONObject> editSpecParam(@Validated({MingruiOperation.Update.class}) @RequestBody SpecParamDto specParamDTO);
+
+
+    @ApiOperation(value = "删除规格参数")
+    @DeleteMapping(value = "specparam/delete")
+    Result<JSONObject> deleteSpecParam(@NotNull Integer id);
+
 }
