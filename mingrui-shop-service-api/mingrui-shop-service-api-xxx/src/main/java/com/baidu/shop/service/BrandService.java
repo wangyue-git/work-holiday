@@ -32,5 +32,7 @@ public interface BrandService {
     @ApiOperation(value = "删除品牌")
     Result<JSONObject> deleteBrandInfo(Integer id);
 
+
+
 }
 

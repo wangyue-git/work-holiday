@@ -1,26 +1,27 @@
 package com.baidu.shop.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baidu.shop.dto.SkuDto;
+import com.baidu.shop.dto.SpuDetailDto;
+import com.baidu.shop.entity.*;
+import com.baidu.shop.mapper.*;
 import com.baidu.shop.utils.BaiDuBeanUtil;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.SpuDto;
-import com.baidu.shop.entity.BrandEntity;
-import com.baidu.shop.entity.CategoryEntity;
-import com.baidu.shop.entity.SpuEntity;
-import com.baidu.shop.mapper.BrandMapper;
-import com.baidu.shop.mapper.CategoryMapper;
-import com.baidu.shop.mapper.SpuMapper;
 import com.baidu.shop.service.GoodsService;
 import com.baidu.shop.status.HTTPStatus;
 import com.baidu.shop.utils.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RestController;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,15 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
 
     @Resource
     private CategoryMapper categoryMapper;
+
+    @Resource
+    private SpuDetailMapper spuDetailMapper;
+
+    @Resource
+    private SkuMapper skuMapper;
+
+    @Resource
+    private StockMapper stockMapper;
 
     //商品列表查询
     @Override
@@ -86,5 +96,46 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         return this.setResult(HTTPStatus.OK,spuEntityPageInfo.getTotal()+"",spuDTOList);
     }
 
+    //新增
+    @Transactional
+    @Override
+    public Result<JSONObject> saveGoods(SpuDto spuDTO) {
+        final Date date = new Date();
+        //新增spu,新增返回主键,给必要字段赋默认值
+        SpuEntity spuEntity = BaiDuBeanUtil.copyProperties(spuDTO, SpuEntity.class);
+        spuEntity.setSaleable(1);
+        spuEntity.setValid(1);
+        spuEntity.setCreateTime(date);
+        spuEntity.setLastUpdateTime(date);
+        spuMapper.insertSelective(spuEntity);
+
+        //新增spuDetail
+        SpuDetailDto spuDetail = spuDTO.getSpuDetail();
+        SpuDetailEntity spuDetailEntity = BaiDuBeanUtil.copyProperties(spuDetail, SpuDetailEntity.class);
+        spuDetailEntity.setSpuId(spuEntity.getId());
+        spuDetailMapper.insertSelective(spuDetailEntity);
+
+        //调用封装,新增sku list插入顺序有序 b,a set a,b treeSet b,a
+        this.saveSkusAndStockInfo(spuDTO,spuEntity.getId(),date);
+        return this.setResultSuccess();
+    }
+
+    //封装新增
+    private void saveSkusAndStockInfo(SpuDto spuDTO,Integer spuId,Date date){
+        List<SkuDto> skus = spuDTO.getSkus();
+        skus.stream().forEach(skuDTO -> {
+            SkuEntity skuEntity = BaiDuBeanUtil.copyProperties(skuDTO, SkuEntity.class);
+            skuEntity.setSpuId(spuId);
+            skuEntity.setCreateTime(date);
+            skuEntity.setLastUpdateTime(date);
+            skuMapper.insertSelective(skuEntity);
+
+            //新增stock
+            StockEntity stockEntity = new StockEntity();
+            stockEntity.setSkuId(skuEntity.getId());
+            stockEntity.setStock(skuDTO.getStock());
+            stockMapper.insertSelective(stockEntity);
+        });
+    }
 
 }
