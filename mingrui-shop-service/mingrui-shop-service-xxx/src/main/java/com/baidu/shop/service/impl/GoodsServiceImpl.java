@@ -1,0 +1,90 @@
+package com.baidu.shop.service.impl;
+
+import com.baidu.shop.utils.BaiDuBeanUtil;
+import com.baidu.shop.base.BaseApiService;
+import com.baidu.shop.base.Result;
+import com.baidu.shop.dto.SpuDto;
+import com.baidu.shop.entity.BrandEntity;
+import com.baidu.shop.entity.CategoryEntity;
+import com.baidu.shop.entity.SpuEntity;
+import com.baidu.shop.mapper.BrandMapper;
+import com.baidu.shop.mapper.CategoryMapper;
+import com.baidu.shop.mapper.SpuMapper;
+import com.baidu.shop.service.GoodsService;
+import com.baidu.shop.status.HTTPStatus;
+import com.baidu.shop.utils.ObjectUtil;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RestController;
+import tk.mybatis.mapper.entity.Example;
+
+import javax.annotation.Resource;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * @ClassName GoodsServiceImpl
+ * @Description: TODO
+ * @Author wangyue
+ * @Date 2021/1/29
+ * @Version V1.0
+ **/
+
+@RestController
+public class GoodsServiceImpl extends BaseApiService implements GoodsService {
+    @Resource
+    private SpuMapper spuMapper;
+
+    @Resource
+    private BrandMapper brandMapper;
+
+    @Resource
+    private CategoryMapper categoryMapper;
+
+    //商品列表查询
+    @Override
+    public Result<List<SpuDto>> getSpuInfo(SpuDto spuDTO) {
+        //分页 SpuDto继承了BaseDto
+        if(ObjectUtil.isNotNull(spuDTO.getPage()) && ObjectUtil.isNotNull(spuDTO.getRows()))
+            PageHelper.startPage(spuDTO.getPage(),spuDTO.getRows());
+        //排序
+        if(!StringUtils.isEmpty(spuDTO.getOrder()) && !StringUtils.isEmpty(spuDTO.getSort()))
+            PageHelper.orderBy(spuDTO.getOrder());
+
+        Example example = new Example(SpuEntity.class);
+        Example.Criteria criteria = example.createCriteria();
+
+        //判断一下是否上架 spuDTO数据传输
+        if(ObjectUtil.isNotNull(spuDTO.getSaleable()) && spuDTO.getSaleable() < 2)
+            criteria.andEqualTo("saleable",spuDTO.getSaleable());
+        //搜索查询 模糊匹配
+        if(!StringUtils.isEmpty(spuDTO.getTitle()))
+            criteria.andLike("title","%" + spuDTO.getTitle() + "%");
+        //查询sql
+        List<SpuEntity> spuEntities = spuMapper.selectByExample(example);
+
+        //商品分类和品牌传到前台是数字 需要转换一下
+        List<SpuDto> spuDTOList = spuEntities.stream().map(spuEntity -> {
+            SpuDto spuDTO1 = BaiDuBeanUtil.copyProperties(spuEntity, SpuDto.class);
+            //通过分类id集合查询数据
+            List<CategoryEntity>categoryEntities = categoryMapper.selectByIdList(Arrays.asList(spuEntity.getCid1(),spuEntity.getCid2(),spuEntity.getCid3()));
+
+            String categoryName = categoryEntities.stream().map(categoryEntity -> categoryEntity.getName()).collect(Collectors.joining("/"));
+            spuDTO1.setCategoryName(categoryName);
+
+            BrandEntity brandEntity = brandMapper.selectByPrimaryKey(spuEntity.getBrandId());
+            spuDTO1.setBrandName(brandEntity.getName());
+            return spuDTO1;
+
+        }).collect(Collectors.toList());
+
+        //分页
+        PageInfo<SpuEntity> spuEntityPageInfo = new PageInfo<>(spuEntities);
+
+        return this.setResult(HTTPStatus.OK,spuEntityPageInfo.getTotal()+"",spuDTOList);
+    }
+
+
+}

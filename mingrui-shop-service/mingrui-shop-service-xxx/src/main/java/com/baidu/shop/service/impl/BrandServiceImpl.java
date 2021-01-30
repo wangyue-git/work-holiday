@@ -1,7 +1,7 @@
 package com.baidu.shop.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.baidu.shop.base.BaiDuBeanUtil;
+import com.baidu.shop.utils.BaiDuBeanUtil;
 import com.baidu.shop.base.BaseApiService;
 import com.baidu.shop.base.Result;
 import com.baidu.shop.dto.BrandDto;

@@ -1,4 +1,4 @@
-package com.baidu.shop.base;
+package com.baidu.shop.utils;
 
 import org.springframework.beans.BeanUtils;
 
