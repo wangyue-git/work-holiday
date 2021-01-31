@@ -102,6 +102,11 @@ public class BrandServiceImpl extends BaseApiService implements BrandService {
         return this.setResultSuccess();
     }
 
+    @Override
+    public Result<List<BrandEntity>> getBrandInfoByCategoryId(Integer cid) {
+        List<BrandEntity>list=brandMapper.getBrandInfoByCategoryId(cid);
+        return this.setResultSuccess(list);
+    }
 
 
     //封装批量新增
