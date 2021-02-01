@@ -153,6 +153,40 @@ public class GoodsServiceImpl extends BaseApiService implements GoodsService {
         return this.setResultSuccess();
     }
 
+    //删除
+    @Transactional
+    @Override
+    public Result<JSONObject> deleteGoods(Integer spuId) {
+        //删除spu
+        spuMapper.deleteByPrimaryKey(spuId);
+        //删除spuDetail
+        spuDetailMapper.deleteByPrimaryKey(spuId);
+        //调用封装删除  删除sku和stock
+        this.deleteSkusAndStock(spuId);
+
+        return this.setResultSuccess();
+    }
+
+    //修改上下架
+    @Transactional
+    @Override
+    public Result<JSONObject> updateStauts(SpuDto spuDTO) {
+        SpuEntity spuEntity = BaiDuBeanUtil.copyProperties(spuDTO,SpuEntity.class);
+        if(ObjectUtil.isNotNull(spuEntity.getSaleable())&&spuEntity.getSaleable()<2){
+            if(spuEntity.getSaleable()==1){
+                spuEntity.setSaleable(0);
+                spuMapper.updateByPrimaryKeySelective(spuEntity);
+                return this.setResultSuccess("已下架");
+            }
+            if(spuEntity.getSaleable()==0){
+                spuEntity.setSaleable(1);
+                spuMapper.updateByPrimaryKeySelective(spuEntity);
+                return this.setResultSuccess("已上架");
+            }
+        }
+        return this.setResultError("下架失败");
+    }
+
     //封装新增
     private void saveSkusAndStockInfo(SpuDto spuDTO,Integer spuId,Date date){
         List<SkuDto> skus = spuDTO.getSkus();
